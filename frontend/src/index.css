@@ -1,0 +1,335 @@
+/* Import Ant Design styles */
+@import '~antd/dist/reset.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Jira Theme Variables */
+:root {
+  --primary-blue: #0052cc;
+  --primary-blue-hover: #0065ff;
+  --primary-blue-active: #003884;
+  --light-blue: #deebff;
+  --dark-blue: #002673;
+  --success-green: #00875a;
+  --warning-yellow: #ff991f;
+  --error-red: #de350b;
+  --background-white: #ffffff;
+  --background-light: #f4f5f7;
+  --background-gray: #fafbfc;
+  --text-primary: #172b4d;
+  --text-secondary: #5e6c84;
+  --text-subtle: #6b778c;
+  --border-color: #dfe1e6;
+  --border-light: #f4f5f7;
+  --neutral-gray: #42526e;
+}
+
+/* Custom global styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-light);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Ant Design Theme Overrides */
+.ant-btn-primary {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+  color: white;
+}
+
+.ant-btn-primary:disabled {
+  background-color: var(--background-light) !important;
+  border-color: var(--primary-blue) !important;
+  color: var(--text-secondary);
+}
+
+.ant-btn-primary:disabled:hover {
+  background-color: var(--background-light) !important;
+  border-color: var(--primary-blue) !important;
+  color: var(--text-secondary);
+}
+
+.ant-btn-primary:hover {
+  background-color: var(--primary-blue-hover) !important;
+  border-color: var(--primary-blue-hover) !important;
+}
+
+.ant-btn-primary:active {
+  background-color: var(--primary-blue-active) !important;
+  border-color: var(--primary-blue-active) !important;
+}
+
+.ant-menu-item-selected {
+  background-color: var(--light-blue) !important;
+  color: var(--primary-blue) !important;
+}
+
+.ant-menu-item:hover {
+  color: var(--primary-blue) !important;
+}
+
+.ant-card {
+  background: var(--background-white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.ant-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.15);
+}
+
+/* Custom overrides for Ant Design if needed */
+.ant-layout {
+  min-height: 100vh;
+  background-color: var(--background-light);
+}
+
+.page-header {
+  background: var(--background-white);
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.page-content {
+  padding: 24px;
+  background: var(--background-white);
+  margin: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  background: var(--background-white);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--background-white);
+  border-radius: 8px;
+}
+
+.project-card {
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--background-white);
+  border: 1px solid var(--border-light);
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.15);
+  border-color: var(--primary-blue);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-blue);
+}
+
+/* Priority colors with Jira theme */
+.priority-highest {
+  border-left: 4px solid var(--error-red);
+}
+
+.priority-high {
+  border-left: 4px solid var(--warning-yellow);
+}
+
+.priority-medium {
+  border-left: 4px solid var(--primary-blue);
+}
+
+.priority-low {
+  border-left: 4px solid var(--success-green);
+}
+
+.priority-lowest {
+  border-left: 4px solid var(--neutral-gray);
+}
+
+/* Issue type icon colors */
+.issue-type-task {
+  color: var(--primary-blue);
+}
+
+.issue-type-bug {
+  color: var(--error-red);
+}
+
+.issue-type-story {
+  color: var(--success-green);
+}
+
+.issue-type-epic {
+  color: var(--dark-blue);
+}
+
+/* Kanban Board Styles */
+.kanban-column {
+  background: var(--background-white);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  min-height: 500px;
+}
+
+.kanban-column.drag-over {
+  background: var(--light-blue);
+  border-color: var(--primary-blue);
+  border-style: dashed;
+}
+
+.kanban-issue-card {
+  background: var(--background-white);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.kanban-issue-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
+}
+
+/* Form and Input Styles */
+.ant-input:focus,
+.ant-input-focused {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
+}
+
+.ant-select:focus .ant-select-selector,
+.ant-select-focused .ant-select-selector {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--primary-blue) !important;
+  border-color: var(--primary-blue) !important;
+}
+
+/* Tags and Status Colors */
+.ant-tag {
+  border-radius: 4px;
+}
+
+.status-todo {
+  background: var(--background-gray);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.status-inprogress {
+  background: var(--light-blue);
+  color: var(--dark-blue);
+  border-color: var(--primary-blue);
+}
+
+.status-done {
+  background: var(--success-green);
+  color: white;
+  border-color: var(--success-green);
+}
+
+/* Responsive grid for cards */
+.responsive-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .page-content {
+    margin: 12px;
+    padding: 16px;
+  }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Kanban board specific styles */
+.kanban-board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.kanban-column {
+  flex: 0 0 300px;
+  background: var(--background-gray);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 500px;
+}
+
+.kanban-item {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.kanban-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.kanban-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}

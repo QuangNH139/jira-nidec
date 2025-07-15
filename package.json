@@ -1,0 +1,32 @@
+{
+  "name": "scrum-project-management",
+  "version": "1.0.0",
+  "description": "A full-stack Scrum project management application",
+  "main": "index.js",
+  "scripts": {
+    "setup": "chmod +x setup.sh && ./setup.sh",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "init-db": "cd backend && npm run init-db"
+  },
+  "keywords": [
+    "scrum",
+    "project-management",
+    "kanban",
+    "react",
+    "nodejs",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
