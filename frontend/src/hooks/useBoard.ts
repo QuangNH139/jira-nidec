@@ -76,7 +76,7 @@ export const useProjectStatuses = (projectId: number) => {
 };
 
 // Hook for updating issue status (drag and drop)
-export const useUpdateIssueStatus = () => {
+export const useUpdateIssueStatus = (projectId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -91,6 +91,9 @@ export const useUpdateIssueStatus = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ['issues'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['backlog', projectId],
       });
       message.success('Issue status updated successfully');
     },
@@ -114,6 +117,9 @@ export const useCreateIssue = (projectId: number) => {
       // Invalidate kanban board data for this project
       queryClient.invalidateQueries({
         queryKey: boardQueryKeys.kanban(projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['backlog', projectId],
       });
       message.success('Issue created successfully');
     },
@@ -146,6 +152,9 @@ export const useUpdateIssue = (projectId: number) => {
       queryClient.invalidateQueries({
         queryKey: ['active-sprint', projectId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['backlog', projectId],
+      });
       message.success('Issue updated successfully');
     },
     onError: (error: any) => {
@@ -168,6 +177,9 @@ export const useDeleteIssue = (projectId: number) => {
       // Invalidate kanban board data for this project
       queryClient.invalidateQueries({
         queryKey: boardQueryKeys.kanban(projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['backlog', projectId],
       });
       message.success('Issue deleted successfully');
     },

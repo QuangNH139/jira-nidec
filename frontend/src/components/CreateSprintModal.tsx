@@ -8,6 +8,7 @@ interface CreateSprintModalProps {
   visible: boolean;
   onCancel: () => void;
   projectId: number;
+  onSprintCreated?: () => void;
 }
 
 interface CreateSprintData {
@@ -21,6 +22,7 @@ interface CreateSprintData {
 const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
   visible,
   onCancel,
+  onSprintCreated,
   projectId
 }) => {
   const [form] = Form.useForm();
@@ -30,9 +32,13 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
     mutationFn: (data: CreateSprintData) => sprintsAPI.create(data),
     onSuccess: (response) => {
       message.success('Sprint created successfully!');
-      // Invalidate and refetch sprints
+      // Invalidate and refetch sprints and issues
       queryClient.invalidateQueries({ queryKey: ['sprints', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['sprints', 'active', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['backlog', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['active-sprint', projectId] });
+      if (onSprintCreated) {
+        onSprintCreated();
+      }
       form.resetFields();
       onCancel();
     },

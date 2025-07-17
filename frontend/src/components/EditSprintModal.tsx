@@ -35,7 +35,7 @@ const EditSprintModal: React.FC<EditSprintModalProps> = ({
       message.success('Sprint updated successfully!');
       // Invalidate and refetch sprints
       queryClient.invalidateQueries({ queryKey: ['sprints', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['sprints', 'active', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['active-sprint', projectId] });
       queryClient.invalidateQueries({ queryKey: ['backlog', projectId] });
       form.resetFields();
       onCancel();

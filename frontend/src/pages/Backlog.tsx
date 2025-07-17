@@ -433,6 +433,8 @@ const Backlog: React.FC = () => {
     onSuccess: () => {
       message.success('Sprint started successfully!');
       queryClient.invalidateQueries({ queryKey: ['sprints', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['active-sprint', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['backlog', projectId] });
       // Navigate to board after starting sprint
       navigate(`/projects/${projectId}/board`);
     },
@@ -447,6 +449,7 @@ const Backlog: React.FC = () => {
     onSuccess: () => {
       message.success('Sprint completed successfully!');
       queryClient.invalidateQueries({ queryKey: ['sprints', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['active-sprint', projectId] });
       queryClient.invalidateQueries({ queryKey: ['backlog', projectId] });
     },
     onError: (error: any) => {
@@ -456,6 +459,18 @@ const Backlog: React.FC = () => {
 
   if (sprintsQuery.isLoading || issuesQuery.isLoading || membersQuery.isLoading) {
     return <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />;
+  }
+
+  if (sprintsQuery.error) {
+    return <div>Error loading sprints: {sprintsQuery.error.message}</div>;
+  }
+
+  if (issuesQuery.error) {
+    return <div>Error loading issues: {issuesQuery.error.message}</div>;
+  }
+
+  if (membersQuery.error) {
+    return <div>Error loading members: {membersQuery.error.message}</div>;
   }
 
   const sprints = sprintsQuery.data || [];
@@ -485,6 +500,10 @@ const Backlog: React.FC = () => {
     });
   };
 
+  const handleCreateSprintSuccess = () => {
+    sprintsQuery.refetch();
+  }
+
   const handleViewIssue = (issue: Issue) => {
     setViewingIssue(issue);
   };
@@ -504,9 +523,25 @@ const Backlog: React.FC = () => {
     setIsEditSprintModalVisible(true);
   };
 
-  const handleDeleteSprint = (sprintId: number) => {
-    // TODO: Implement delete sprint
-    console.log('Delete sprint:', sprintId);
+  const handleDeleteSprint = async (sprintId: number) => {
+    try {
+      Modal.confirm({
+        title: 'Delete Sprint',
+        content: 'Are you sure you want to delete this sprint? All issues will be moved back to the backlog.',
+        okText: 'Delete',
+        okType: 'danger',
+        cancelText: 'Cancel',
+        onOk: async () => {
+          await sprintsAPI.delete(sprintId);
+          message.success('Sprint deleted successfully');
+          sprintsQuery.refetch();
+          issuesQuery.refetch();
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting sprint:', error);
+      message.error('Failed to delete sprint');
+    }
   };
 
   return (
@@ -615,6 +650,7 @@ const Backlog: React.FC = () => {
         <CreateSprintModal
           visible={isCreateSprintModalVisible}
           onCancel={() => setIsCreateSprintModalVisible(false)}
+          onSprintCreated={handleCreateSprintSuccess}
           projectId={parseInt(projectId!)}
         />
 

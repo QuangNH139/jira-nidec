@@ -300,7 +300,7 @@ const Board: React.FC = () => {
   const membersQuery = useProjectMembers(parseInt(projectId!));
   const statusesQuery = useProjectStatuses(parseInt(projectId!));
   
-  const updateIssueStatusMutation = useUpdateIssueStatus();
+  const updateIssueStatusMutation = useUpdateIssueStatus(parseInt(projectId!));
   const createIssueMutation = useCreateIssue(parseInt(projectId!));
   const updateIssueMutation = useUpdateIssue(parseInt(projectId!));
   const deleteIssueMutation = useDeleteIssue(parseInt(projectId!));
