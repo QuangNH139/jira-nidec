@@ -606,7 +606,7 @@ const Board: React.FC = () => {
               <Col span={12}>
                 <Form.Item name="story_points" label="Story Points">
                   <Select placeholder="Select story points" allowClear>
-                    {[1, 2, 3, 5, 8, 13, 21].map((point) => (
+                    {[0,1,2,3,4,5,6,7,8,9,10].map((point) => (
                       <Option key={point} value={point}>
                         {point}
                       </Option>
@@ -732,7 +732,7 @@ const Board: React.FC = () => {
               <Col span={12}>
                 <Form.Item name="story_points" label="Story Points">
                   <Select placeholder="Select story points" allowClear>
-                    {[1, 2, 3, 5, 8, 13, 21].map((point) => (
+                    {[0,1,2,3,4,5,6,7,8,9,10].map((point) => (
                       <Option key={point} value={point}>
                         {point}
                       </Option>
