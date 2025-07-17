@@ -97,7 +97,7 @@ const Projects: React.FC = () => {
   };
 
   const handleViewBoard = (projectId: number) => {
-    navigate(`/projects/${projectId}/board`);
+    navigate(`/projects/${projectId}/backlog`);
   };
 
   const handleViewTeam = (projectId: number) => {

@@ -8,6 +8,8 @@ import projectRoutes from './routes/projects';
 import sprintRoutes from './routes/sprints';
 import issueRoutes from './routes/issues';
 import commentRoutes from './routes/comments';
+import logRoutes from './routes/logs';
+import uploadRoutes from './routes/upload';
 
 dotenv.config();
 
@@ -26,6 +28,8 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/sprints', sprintRoutes);
 app.use('/api/issues', issueRoutes);
 app.use('/api/comments', commentRoutes);
+app.use('/api/logs', logRoutes);
+app.use('/api', uploadRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {

@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import UserModel from '../models/User';
 import { generateToken } from '../middleware/auth';
 import { LoginCredentials, RegisterData } from '../types';
+import Logger from '../services/Logger';
 
 const router = express.Router();
 
@@ -36,6 +37,20 @@ router.post('/register', [
     const user = await UserModel.create({ username, email, password, full_name });
     const token = generateToken(user);
 
+    await Logger.info('USER_REGISTER', {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.full_name,
+      role: user.role
+    }, {
+      id: user.id,
+      username: user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+
     res.status(201).json({
       message: 'User created successfully',
       token,
@@ -49,6 +64,16 @@ router.post('/register', [
     });
   } catch (error) {
     console.error('Registration error:', error);
+    
+    await Logger.error('USER_REGISTER_ERROR', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      email: req.body.email,
+      username: req.body.username
+    }, undefined, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -75,10 +100,30 @@ router.post('/login', [
     // Validate password
     const isValidPassword = await UserModel.validatePassword(password, user.password);
     if (!isValidPassword) {
+      await Logger.warn('USER_LOGIN_FAILED', {
+        email,
+        reason: 'Invalid password'
+      }, undefined, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = generateToken(user);
+
+    await Logger.info('USER_LOGIN', {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    }, {
+      id: user.id,
+      username: user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
 
     res.json({
       message: 'Login successful',
@@ -93,6 +138,15 @@ router.post('/login', [
     });
   } catch (error) {
     console.error('Login error:', error);
+    
+    await Logger.error('USER_LOGIN_ERROR', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      email: req.body.email
+    }, undefined, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -9,6 +9,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   SettingOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,6 +43,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <UserOutlined />,
       label: 'Users',
     }] : []),
+    {
+      key: '/my-activities',
+      icon: <ClockCircleOutlined />,
+      label: 'My Activities',
+    },
     {
       key: '/profile',
       icon: <SettingOutlined />,

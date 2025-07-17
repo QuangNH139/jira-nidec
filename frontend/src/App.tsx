@@ -14,8 +14,10 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Users from './pages/Users';
 import Board from './pages/Board';
+import Backlog from './pages/Backlog';
 import TeamMembers from './pages/TeamMembers';
 import Profile from './pages/Profile';
+import MyActivities from './pages/MyActivities';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -103,6 +105,30 @@ const App: React.FC = () => {
                     <ProtectedRoute>
                       <Layout>
                         <Profile />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/my-activities"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <MyActivities />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/projects/:projectId/backlog"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <ProjectAccessGuard>
+                          <Backlog />
+                        </ProjectAccessGuard>
                       </Layout>
                     </ProtectedRoute>
                   }

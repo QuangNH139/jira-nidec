@@ -1,9 +1,13 @@
 import express, { Request, Response } from 'express';
 import { body, validationResult, query } from 'express-validator';
 import xlsx from 'xlsx';
+import ExcelJS from 'exceljs';
+import fs from 'fs';
+import path from 'path';
 import { AuthenticatedRequest, authenticateToken, requireProjectAccess } from '../middleware/auth';
 import IssueModel from '../models/Issue';
 import ProjectModel from '../models/Project';
+import Logger from '../services/Logger';
 
 const router = express.Router();
 
@@ -154,12 +158,44 @@ router.post('/', [
       assignee_id, reporter_id, project_id, sprint_id, story_points, start_date 
     });
     
+    await Logger.info('ISSUE_CREATE', {
+      issueId: issue.id,
+      title,
+      type,
+      priority,
+      projectId: project_id,
+      assigneeId: assignee_id,
+      sprintId: sprint_id,
+      storyPoints: story_points
+    }, {
+      id: req.user.id,
+      username: req.user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
     res.status(201).json({
       message: 'Issue created successfully',
       issue
     });
   } catch (error) {
     console.error('Create issue error:', error);
+    
+    if (req.user) {
+      await Logger.error('ISSUE_CREATE_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        title: req.body.title,
+        projectId: req.body.project_id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -202,7 +238,8 @@ router.put('/:id', [
 
     const { 
       title, description, type, priority, status_id, 
-      assignee_id, sprint_id, story_points, start_date 
+      assignee_id, sprint_id, story_points, start_date,
+      before_image, after_image
     } = req.body;
 
     // Validate assignee_id if provided
@@ -217,8 +254,85 @@ router.put('/:id', [
 
     const issue = await IssueModel.update(issueId, { 
       title, description, type, priority, status_id, 
-      assignee_id, sprint_id, story_points, start_date 
+      assignee_id, sprint_id, story_points, start_date,
+      before_image, after_image
     });
+
+    // Log detailed changes
+    const changes: Record<string, any> = {};
+    const previousData: Record<string, any> = {};
+
+    if (title !== undefined && title !== existingIssue.title) {
+      changes.title = title;
+      previousData.title = existingIssue.title;
+    }
+    if (assignee_id !== undefined && assignee_id !== existingIssue.assignee_id) {
+      changes.assignee_id = assignee_id;
+      previousData.assignee_id = existingIssue.assignee_id;
+      
+      // Log assignment change separately
+      await Logger.info('ISSUE_ASSIGN', {
+        issueId,
+        issueTitle: existingIssue.title,
+        previousAssignee: existingIssue.assignee_id,
+        newAssignee: assignee_id,
+        projectId: existingIssue.project_id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    if (story_points !== undefined && story_points !== existingIssue.story_points) {
+      changes.story_points = story_points;
+      previousData.story_points = existingIssue.story_points;
+      
+      // Log story points change separately
+      await Logger.info('ISSUE_STORY_POINTS_UPDATE', {
+        issueId,
+        issueTitle: existingIssue.title,
+        previousPoints: existingIssue.story_points,
+        newPoints: story_points,
+        projectId: existingIssue.project_id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    if (sprint_id !== undefined && sprint_id !== existingIssue.sprint_id) {
+      changes.sprint_id = sprint_id;
+      previousData.sprint_id = existingIssue.sprint_id;
+    }
+    if (priority !== undefined && priority !== existingIssue.priority) {
+      changes.priority = priority;
+      previousData.priority = existingIssue.priority;
+    }
+    if (type !== undefined && type !== existingIssue.type) {
+      changes.type = type;
+      previousData.type = existingIssue.type;
+    }
+
+    // Log general update if there were changes
+    if (Object.keys(changes).length > 0) {
+      await Logger.info('ISSUE_UPDATE', {
+        issueId,
+        issueTitle: existingIssue.title,
+        changes,
+        previousData,
+        projectId: existingIssue.project_id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
     
     res.json({
       message: 'Issue updated successfully',
@@ -226,6 +340,20 @@ router.put('/:id', [
     });
   } catch (error) {
     console.error('Update issue error:', error);
+    
+    if (req.user) {
+      await Logger.error('ISSUE_UPDATE_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        issueId: req.params.id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -310,58 +438,156 @@ router.get('/project/:projectId/export', [
     // Get issues in date range
     const issues = await IssueModel.getByDateRange(projectId, startDate, endDate);
 
-    // Prepare data for Excel
-    const excelData = issues.map(issue => ({
-      'ID': issue.id,
-      'Title': issue.title,
-      'Description': issue.description || '',
-      'Type': issue.type,
-      'Priority': issue.priority,
-      'Status': issue.status_name,
-      'Assignee': issue.assignee_name || 'Unassigned',
-      'Reporter': issue.reporter_name || '',
-      'Story Points': issue.story_points || '',
-      'Start Date': issue.start_date || '',
-      'Created At': new Date(issue.created_at).toLocaleDateString(),
-      'Updated At': new Date(issue.updated_at).toLocaleDateString()
-    }));
+    // Create workbook with ExcelJS for image support
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Issues');
 
-    // Create workbook
-    const workbook = xlsx.utils.book_new();
-    const worksheet = xlsx.utils.json_to_sheet(excelData);
-
-    // Set column widths
-    const columnWidths = [
-      { wch: 5 },  // ID
-      { wch: 30 }, // Title
-      { wch: 40 }, // Description
-      { wch: 10 }, // Type
-      { wch: 10 }, // Priority
-      { wch: 15 }, // Status
-      { wch: 20 }, // Assignee
-      { wch: 20 }, // Reporter
-      { wch: 12 }, // Story Points
-      { wch: 12 }, // Start Date
-      { wch: 12 }, // Created At
-      { wch: 12 }  // Updated At
+    // Define columns
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 8 },
+      { header: 'Title', key: 'title', width: 30 },
+      { header: 'Description', key: 'description', width: 40 },
+      { header: 'Type', key: 'type', width: 12 },
+      { header: 'Priority', key: 'priority', width: 12 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Assignee', key: 'assignee', width: 20 },
+      { header: 'Reporter', key: 'reporter', width: 20 },
+      { header: 'Story Points', key: 'storyPoints', width: 12 },
+      { header: 'Start Date', key: 'startDate', width: 12 },
+      { header: 'Before Image', key: 'beforeImage', width: 30 },
+      { header: 'After Image', key: 'afterImage', width: 30 },
+      { header: 'Created At', key: 'createdAt', width: 15 },
+      { header: 'Updated At', key: 'updatedAt', width: 15 }
     ];
-    worksheet['!cols'] = columnWidths;
 
-    // Add worksheet to workbook
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Issues');
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+
+    // Add data rows
+    for (let i = 0; i < issues.length; i++) {
+      const issue = issues[i];
+      const rowIndex = i + 2; // Start from row 2 (after header)
+      
+      // Set row height to accommodate images
+      worksheet.getRow(rowIndex).height = 120;
+      
+      // Add basic issue data
+      worksheet.addRow({
+        id: issue.id,
+        title: issue.title,
+        description: issue.description || '',
+        type: issue.type,
+        priority: issue.priority,
+        status: issue.status_name,
+        assignee: issue.assignee_name || 'Unassigned',
+        reporter: issue.reporter_name || '',
+        storyPoints: issue.story_points || '',
+        startDate: issue.start_date || '',
+        beforeImage: '', // Will be replaced with actual image
+        afterImage: '', // Will be replaced with actual image
+        createdAt: new Date(issue.created_at).toLocaleDateString(),
+        updatedAt: new Date(issue.updated_at).toLocaleDateString()
+      });
+
+      // Add before image if exists
+      if (issue.before_image) {
+        const beforeImagePath = path.join(__dirname, '../../uploads', issue.before_image);
+        if (fs.existsSync(beforeImagePath)) {
+          try {
+            const beforeImageId = workbook.addImage({
+              filename: beforeImagePath,
+              extension: path.extname(issue.before_image).slice(1).toLowerCase() as any
+            });
+            
+            worksheet.addImage(beforeImageId, {
+              tl: { col: 10, row: rowIndex - 1 }, // Before Image column (K)
+              ext: { width: 100, height: 100 }
+            });
+          } catch (error) {
+            console.warn(`Failed to add before image for issue ${issue.id}:`, error);
+            worksheet.getCell(rowIndex, 11).value = 'Image not found';
+          }
+        } else {
+          worksheet.getCell(rowIndex, 11).value = 'Image file missing';
+        }
+      } else {
+        worksheet.getCell(rowIndex, 11).value = 'No image';
+      }
+
+      // Add after image if exists
+      if (issue.after_image) {
+        const afterImagePath = path.join(__dirname, '../../uploads', issue.after_image);
+        if (fs.existsSync(afterImagePath)) {
+          try {
+            const afterImageId = workbook.addImage({
+              filename: afterImagePath,
+              extension: path.extname(issue.after_image).slice(1).toLowerCase() as any
+            });
+            
+            worksheet.addImage(afterImageId, {
+              tl: { col: 11, row: rowIndex - 1 }, // After Image column (L)
+              ext: { width: 100, height: 100 }
+            });
+          } catch (error) {
+            console.warn(`Failed to add after image for issue ${issue.id}:`, error);
+            worksheet.getCell(rowIndex, 12).value = 'Image not found';
+          }
+        } else {
+          worksheet.getCell(rowIndex, 12).value = 'Image file missing';
+        }
+      } else {
+        worksheet.getCell(rowIndex, 12).value = 'No image';
+      }
+    }
 
     // Generate Excel buffer
-    const excelBuffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    const excelBuffer = await workbook.xlsx.writeBuffer();
 
     // Set response headers
     const filename = `${project.name}_Issues_${startDate}_to_${endDate}.xlsx`;
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
+    await Logger.info('EXCEL_EXPORT', {
+      projectId,
+      projectName: project.name,
+      startDate,
+      endDate,
+      issueCount: issues.length,
+      filename
+    }, {
+      id: req.user.id,
+      username: req.user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+
     // Send file
-    res.send(excelBuffer);
+    res.send(Buffer.from(excelBuffer));
   } catch (error) {
     console.error('Export issues error:', error);
+    
+    if (req.user) {
+      await Logger.error('EXCEL_EXPORT_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        projectId: req.params.projectId,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -390,6 +616,17 @@ router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: 
       const isAssignee = existingIssue.assignee_id === req.user.id;
       
       if (!isMember && !isReporter && !isAssignee) {
+        await Logger.warn('ISSUE_DELETE_ACCESS_DENIED', {
+          issueId,
+          projectId: existingIssue.project_id,
+          issueTitle: existingIssue.title
+        }, {
+          id: req.user.id,
+          username: req.user.username
+        }, {
+          ip: req.ip,
+          userAgent: req.get('user-agent') || ''
+        });
         return res.status(403).json({ error: 'Access denied. You can only delete issues you created, are assigned to, or are a project member.' });
       }
     }
@@ -399,9 +636,37 @@ router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: 
       return res.status(500).json({ error: 'Failed to delete issue' });
     }
     
+    await Logger.info('ISSUE_DELETE', {
+      issueId,
+      issueTitle: existingIssue.title,
+      projectId: existingIssue.project_id,
+      type: existingIssue.type,
+      priority: existingIssue.priority
+    }, {
+      id: req.user.id,
+      username: req.user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
     res.json({ message: 'Issue deleted successfully' });
   } catch (error) {
     console.error('Delete issue error:', error);
+    
+    if (req.user) {
+      await Logger.error('ISSUE_DELETE_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        issueId: req.params.id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 });

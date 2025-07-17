@@ -58,9 +58,11 @@ export interface Issue {
   reporter_name?: string;
   project_id: number;
   project_name?: string;
-  sprint_id?: number;
+  sprint_id?: number | null;
   story_points?: number;
   start_date?: string;
+  before_image?: string;
+  after_image?: string;
   created_at: string;
   updated_at?: string;
 }

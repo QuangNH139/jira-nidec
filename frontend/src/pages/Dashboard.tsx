@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Row, Col, Card, Statistic, Typography, Space, Button, Spin, List, Avatar, Tag } from 'antd';
 import {
   BarChartOutlined, 
@@ -8,17 +8,22 @@ import {
   TeamOutlined,
   UserOutlined,
   BugOutlined,
-  CheckSquareOutlined
+  CheckSquareOutlined,
+  EyeOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
 import { useUserIssues } from '../hooks/useIssues';
+import IssueDetailModal from '../components/IssueDetailModal';
+import { Issue } from '../types';
 
 const { Title, Text } = Typography;
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [viewingIssue, setViewingIssue] = useState<Issue | null>(null);
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   
   // TanStack Query hooks
   const projectsQuery = useProjects();
@@ -152,7 +157,22 @@ const Dashboard: React.FC = () => {
               <List
                 dataSource={userIssues.slice(0, 5)}
                 renderItem={(issue: any) => (
-                  <List.Item>
+                  <List.Item
+                    actions={[
+                      <Button
+                        key="view"
+                        type="text"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => {
+                          setViewingIssue(issue);
+                          setIsViewModalVisible(true);
+                        }}
+                      >
+                        View
+                      </Button>
+                    ]}
+                  >
                     <List.Item.Meta
                       avatar={<Avatar icon={getIssueIcon(issue.type)} />}
                       title={
@@ -242,6 +262,16 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Issue Detail Modal */}
+      <IssueDetailModal
+        visible={isViewModalVisible}
+        onCancel={() => {
+          setIsViewModalVisible(false);
+          setViewingIssue(null);
+        }}
+        issue={viewingIssue}
+      />
     </div>
   );
 };

@@ -116,6 +116,8 @@ export interface Issue {
   sprint_id?: number;
   story_points?: number;
   start_date?: string;
+  before_image?: string;
+  after_image?: string;
   created_at: string;
   updated_at: string;
 }
@@ -141,9 +143,11 @@ export interface UpdateIssueData {
   priority?: 'low' | 'medium' | 'high' | 'critical';
   status_id?: number;
   assignee_id?: number;
-  sprint_id?: number;
+  sprint_id?: number | null;
   story_points?: number;
   start_date?: string;
+  before_image?: string;
+  after_image?: string;
 }
 
 export interface Comment {

@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  useKanbanBoard,
+  useCreateIssue, 
+  useUpdateIssue,
+  useDeleteIssue 
+} from '../hooks/useBoard';
 import dayjs from 'dayjs';
 import {
   Typography,
@@ -29,25 +35,27 @@ import {
   ExclamationCircleFilled,
   MoreOutlined,
   EditOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  EyeOutlined
 } from '@ant-design/icons';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { KanbanColumn, Issue } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { 
-  useKanbanBoard, 
-  useUpdateIssueStatus, 
-  useCreateIssue, 
-  useUpdateIssue,
-  useDeleteIssue 
-} from '../hooks/useIssues';
+  useActiveSprint,
+  useUpdateIssueStatus 
+} from '../hooks/useBoard';
 import { 
   useProject, 
   useProjectMembers, 
   useProjectStatuses 
 } from '../hooks/useProjects';
 import ExcelExport from '../components/ExcelExport';
+import CreateSprintModal from '../components/CreateSprintModal';
+import ProjectNavigation from '../components/ProjectNavigation';
+import EditIssueModal from '../components/EditIssueModal';
+import IssueDetailModal from '../components/IssueDetailModal';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -65,9 +73,10 @@ interface DraggedIssue {
 // Issue Card Component with drag functionality
 const IssueCard: React.FC<{
   issue: Issue;
+  onView: (issue: Issue) => void;
   onEdit: (issue: Issue) => void;
   onDelete: (issueId: number) => void;
-}> = ({ issue, onEdit, onDelete }) => {
+}> = ({ issue, onView, onEdit, onDelete }) => {
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.ISSUE,
     item: { id: issue.id, status_id: issue.status_id },
@@ -107,6 +116,12 @@ const IssueCard: React.FC<{
   };
 
   const menuItems = [
+    {
+      key: 'view',
+      label: 'View Details',
+      icon: <EyeOutlined />,
+      onClick: () => onView(issue),
+    },
     {
       key: 'edit',
       label: 'Edit Issue',
@@ -181,13 +196,28 @@ const IssueCard: React.FC<{
           {issue.story_points && (
             <Tag className="text-xs">{issue.story_points} pts</Tag>
           )}
+          {(issue.before_image || issue.after_image) && (
+            <Tag color="blue" className="text-xs">📷</Tag>
+          )}
         </Space>
         
-        {issue.assignee_id && (
-          <Tooltip title={issue.assignee_name}>
-            <Avatar size="small" icon={<UserOutlined />} />
-          </Tooltip>
-        )}
+        <div className="flex items-center space-x-1">
+          {issue.assignee_id && (
+            <Tooltip title={issue.assignee_name}>
+              <Avatar size="small" icon={<UserOutlined />} />
+            </Tooltip>
+          )}
+          <Button
+            type="text"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(issue);
+            }}
+            style={{ padding: '2px 4px' }}
+          />
+        </div>
       </div>
     </Card>
   );
@@ -197,9 +227,10 @@ const IssueCard: React.FC<{
 const KanbanColumnComponent: React.FC<{
   column: KanbanColumn;
   onDrop: (issueId: number, newStatusId: number) => void;
+  onView: (issue: Issue) => void;
   onEdit: (issue: Issue) => void;
   onDelete: (issueId: number) => void;
-}> = ({ column, onDrop, onEdit, onDelete }) => {
+}> = ({ column, onDrop, onView, onEdit, onDelete }) => {
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.ISSUE,
     drop: (item: DraggedIssue) => {
@@ -246,7 +277,7 @@ const KanbanColumnComponent: React.FC<{
       ) : (
         <div className="space-y-2">
           {column.issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} onEdit={onEdit} onDelete={onDelete} />
+            <IssueCard key={issue.id} issue={issue} onView={onView} onEdit={onEdit} onDelete={onDelete} />
           ))}
         </div>
       )}
@@ -259,8 +290,12 @@ const Board: React.FC = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   
-  // TanStack Query hooks
-  const kanbanQuery = useKanbanBoard(parseInt(projectId!));
+  // Get active sprint first
+  const activeSprintQuery = useActiveSprint(parseInt(projectId!));
+  const activeSprint = activeSprintQuery.data;
+  
+  // TanStack Query hooks - only fetch kanban when we have project info
+  const kanbanQuery = useKanbanBoard(parseInt(projectId!), activeSprint?.id);
   const projectQuery = useProject(parseInt(projectId!));
   const membersQuery = useProjectMembers(parseInt(projectId!));
   const statusesQuery = useProjectStatuses(parseInt(projectId!));
@@ -273,13 +308,16 @@ const Board: React.FC = () => {
   // Local state for modals and forms
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
+  const [isCreateSprintModalVisible, setIsCreateSprintModalVisible] = useState(false);
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
+  const [viewingIssue, setViewingIssue] = useState<Issue | null>(null);
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
   // Handle errors - redirect if access denied
   React.useEffect(() => {
-    const error = kanbanQuery.error || projectQuery.error || membersQuery.error || statusesQuery.error;
+    const error = kanbanQuery.error || projectQuery.error || membersQuery.error || statusesQuery.error || activeSprintQuery.error;
     if (error) {
       const errorResponse = error as any;
       if (errorResponse.response?.status === 403) {
@@ -287,7 +325,7 @@ const Board: React.FC = () => {
         navigate('/projects');
       }
     }
-  }, [kanbanQuery.error, projectQuery.error, membersQuery.error, statusesQuery.error, navigate]);
+  }, [kanbanQuery.error, projectQuery.error, membersQuery.error, statusesQuery.error, activeSprintQuery.error, navigate]);
 
   // Get assignee options including current assignee if not in members
   const getAssigneeOptions = () => {
@@ -330,6 +368,11 @@ const Board: React.FC = () => {
     });
   };
 
+  const handleViewIssue = (issue: Issue) => {
+    setViewingIssue(issue);
+    setIsViewModalVisible(true);
+  };
+
   const handleEditIssue = (issue: Issue) => {
     console.log('Editing issue:', issue); // Debug log
     setEditingIssue(issue);
@@ -351,7 +394,11 @@ const Board: React.FC = () => {
 
     updateIssueMutation.mutate({
       issueId: editingIssue.id,
-      issueData: values
+      issueData: {
+        ...values,
+        // Preserve the sprint_id to prevent issue from being removed from sprint
+        sprint_id: editingIssue.sprint_id
+      }
     }, {
       onSuccess: () => {
         setIsEditModalVisible(false);
@@ -365,7 +412,7 @@ const Board: React.FC = () => {
     deleteIssueMutation.mutate(issueId);
   };
 
-  const isLoading = kanbanQuery.isLoading || projectQuery.isLoading || membersQuery.isLoading || statusesQuery.isLoading;
+  const isLoading = kanbanQuery.isLoading || projectQuery.isLoading || membersQuery.isLoading || statusesQuery.isLoading || activeSprintQuery.isLoading;
 
   if (isLoading) {
     return (
@@ -375,26 +422,62 @@ const Board: React.FC = () => {
     );
   }
 
+  // Check if there's an active sprint - if not, show all issues in backlog
   const columns = kanbanQuery.data || [];
   const project = projectQuery.data;
   const members = membersQuery.data || [];
   const statuses = statusesQuery.data || [];
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <Title level={2} className="m-0">
-              {project?.name} Board
-            </Title>
-            <Text type="secondary">{project?.description}</Text>
-          </div>
+    <div>
+      <ProjectNavigation />
+      <DndProvider backend={HTML5Backend}>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <Title level={2} className="m-0">
+                {project?.name} Board
+              </Title>
+              <Text type="secondary">{project?.description}</Text>
+              {activeSprint ? (
+                <div className="mt-2">
+                  <Text type="secondary" className="text-sm">
+                    Active Sprint: <strong>{activeSprint.name}</strong>
+                    {activeSprint.start_date && activeSprint.end_date && (
+                      <span className="ml-2">
+                        ({new Date(activeSprint.start_date).toLocaleDateString()} - {new Date(activeSprint.end_date).toLocaleDateString()})
+                      </span>
+                    )}
+                  </Text>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <Text type="warning" className="text-sm">
+                    No active sprint - showing all project issues. Start a sprint in the Backlog to organize work.
+                  </Text>
+                </div>
+              )}
+            </div>
           <Space>
             <ExcelExport 
               projectId={parseInt(projectId!)} 
               projectName={project?.name || 'Project'} 
             />
+            {!activeSprint && (
+              <Button
+                type="default"
+                onClick={() => navigate(`/projects/${projectId}/backlog`)}
+              >
+                Go to Backlog
+              </Button>
+            )}
+            <Button
+              type="default"
+              icon={<PlusOutlined />}
+              onClick={() => setIsCreateSprintModalVisible(true)}
+            >
+              Create Sprint
+            </Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -411,6 +494,7 @@ const Board: React.FC = () => {
               <KanbanColumnComponent
                 column={column}
                 onDrop={handleDrop}
+                onView={handleViewIssue}
                 onEdit={handleEditIssue}
                 onDelete={handleDeleteIssue}
               />
@@ -668,8 +752,38 @@ const Board: React.FC = () => {
             </Row>
           </Form>
         </Modal>
-      </div>
-    </DndProvider>
+
+        {/* Create Sprint Modal */}
+        <CreateSprintModal
+          visible={isCreateSprintModalVisible}
+          onCancel={() => setIsCreateSprintModalVisible(false)}
+          projectId={parseInt(projectId!)}
+        />
+
+        {/* Issue Detail Modal */}
+        <IssueDetailModal
+          visible={isViewModalVisible}
+          onCancel={() => {
+            setIsViewModalVisible(false);
+            setViewingIssue(null);
+          }}
+          issue={viewingIssue}
+        />
+
+        {/* Edit Issue Modal */}
+        <EditIssueModal
+          visible={isEditModalVisible}
+          onCancel={() => {
+            setIsEditModalVisible(false);
+            setEditingIssue(null);
+          }}
+          issue={editingIssue}
+          projectMembers={members}
+          projectId={parseInt(projectId!)}
+        />
+        </div>
+      </DndProvider>
+    </div>
   );
 };
 

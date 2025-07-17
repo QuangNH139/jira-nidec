@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { issuesAPI, projectsAPI } from '../services/api';
+import { issuesAPI, projectsAPI, sprintsAPI } from '../services/api';
 import { Issue } from '../types';
 
 // Query keys
@@ -13,16 +13,29 @@ export const boardQueryKeys = {
   statuses: (projectId: number) => [...boardQueryKeys.project(projectId), 'statuses'] as const,
 };
 
-// Hook for fetching kanban board data
-export const useKanbanBoard = (projectId: number) => {
+// Hook for fetching kanban board data with optional sprint filter
+export const useKanbanBoard = (projectId: number, sprintId?: number) => {
   return useQuery({
-    queryKey: boardQueryKeys.kanban(projectId),
+    queryKey: [...boardQueryKeys.kanban(projectId), sprintId],
     queryFn: async () => {
-      const response = await issuesAPI.getKanban(projectId);
+      const response = await issuesAPI.getKanban(projectId, sprintId);
       return response.data;
     },
     enabled: !!projectId,
     staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+// Hook for fetching active sprint
+export const useActiveSprint = (projectId: number) => {
+  return useQuery({
+    queryKey: ['active-sprint', projectId],
+    queryFn: async () => {
+      const response = await sprintsAPI.getActive(projectId);
+      return response.data;
+    },
+    enabled: !!projectId,
+    staleTime: 60 * 1000, // 1 minute
   });
 };
 
@@ -71,11 +84,13 @@ export const useUpdateIssueStatus = () => {
       const response = await issuesAPI.updateStatus(issueId, statusId);
       return response.data;
     },
-    onSuccess: (_, { issueId }) => {
-      // Find which project this issue belongs to and invalidate that project's kanban data
-      // We'll invalidate all kanban queries for simplicity
+    onSuccess: () => {
+      // Invalidate all kanban queries and board data
       queryClient.invalidateQueries({
         queryKey: boardQueryKeys.all,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['issues'],
       });
       message.success('Issue status updated successfully');
     },
@@ -123,11 +138,42 @@ export const useUpdateIssue = (projectId: number) => {
       queryClient.invalidateQueries({
         queryKey: boardQueryKeys.kanban(projectId),
       });
+      // Also invalidate general board queries
+      queryClient.invalidateQueries({
+        queryKey: boardQueryKeys.all,
+      });
+      // Invalidate active sprint query as well
+      queryClient.invalidateQueries({
+        queryKey: ['active-sprint', projectId],
+      });
       message.success('Issue updated successfully');
     },
     onError: (error: any) => {
       console.error('Error updating issue:', error);
       message.error('Failed to update issue');
+    },
+  });
+};
+
+// Hook for deleting an issue
+export const useDeleteIssue = (projectId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (issueId: number) => {
+      const response = await issuesAPI.delete(issueId);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate kanban board data for this project
+      queryClient.invalidateQueries({
+        queryKey: boardQueryKeys.kanban(projectId),
+      });
+      message.success('Issue deleted successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error deleting issue:', error);
+      message.error('Failed to delete issue');
     },
   });
 };

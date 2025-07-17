@@ -84,6 +84,8 @@ db.serialize(() => {
     sprint_id INTEGER,
     story_points INTEGER,
     start_date DATE,
+    before_image VARCHAR(255),
+    after_image VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (status_id) REFERENCES issue_statuses(id),
@@ -104,6 +106,23 @@ db.serialize(() => {
     FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES users(id)
   )`);
+
+  // Add image columns to issues table if they don't exist (migration)
+  db.run("ALTER TABLE issues ADD COLUMN before_image VARCHAR(255)", (err: Error | null) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding before_image column:', err);
+    } else if (!err) {
+      console.log('Added before_image column to issues table');
+    }
+  });
+  
+  db.run("ALTER TABLE issues ADD COLUMN after_image VARCHAR(255)", (err: Error | null) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding after_image column:', err);
+    } else if (!err) {
+      console.log('Added after_image column to issues table');
+    }
+  });
 
   console.log('Database initialized successfully!');
 });

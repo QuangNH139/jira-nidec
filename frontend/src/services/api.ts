@@ -176,4 +176,32 @@ export const commentsAPI = {
   delete: (id: number): Promise<AxiosResponse<{ message: string }>> => api.delete(`/comments/${id}`),
 };
 
+// Upload API
+export const uploadAPI = {
+  uploadFile: (file: File): Promise<AxiosResponse<{ message: string; filename: string; url: string }>> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  deleteFile: (filename: string): Promise<AxiosResponse<{ message: string }>> => 
+    api.delete(`/uploads/${filename}`),
+  getFileUrl: (filename: string): string => `${API_BASE_URL}/uploads/${filename}`,
+};
+
+// Logs API
+export const logsAPI = {
+  getMyActivities: (params?: { limit?: number; action?: string; projectId?: number }): Promise<AxiosResponse<any>> =>
+    api.get('/logs/my-activities', { params }),
+  getDatabase: (params?: { limit?: number; userId?: number; action?: string }): Promise<AxiosResponse<any>> =>
+    api.get('/logs/database', { params }),
+  getFile: (limit?: number): Promise<AxiosResponse<any>> =>
+    api.get('/logs/file', { params: { limit } }),
+  rotate: (daysToKeep?: number): Promise<AxiosResponse<{ message: string; daysKept: number }>> =>
+    api.post('/logs/rotate', {}, { params: { daysToKeep } }),
+};
+
 export default api;

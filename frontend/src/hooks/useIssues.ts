@@ -62,6 +62,7 @@ export const useIssue = (issueId: number) => {
       return response.data;
     },
     enabled: !!issueId,
+    staleTime: 30 * 1000, // 30 seconds
   });
 };
 
@@ -115,6 +116,8 @@ export const useUpdateIssue = (projectId: number) => {
       queryClient.invalidateQueries({ queryKey: issueKeys.kanban(projectId) });
       queryClient.invalidateQueries({ queryKey: issueKeys.detail(issueId) });
       queryClient.invalidateQueries({ queryKey: issueKeys.stats(projectId) });
+      // Invalidate board queries for this specific project
+      queryClient.invalidateQueries({ queryKey: ['board', 'kanban', projectId] });
       message.success('Issue updated successfully');
     },
     onError: (error: any) => {
@@ -134,9 +137,13 @@ export const useUpdateIssueStatus = () => {
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate all kanban queries for simplicity
+      // Invalidate all relevant queries
       queryClient.invalidateQueries({
         queryKey: issueKeys.all,
+      });
+      // Also invalidate all board queries
+      queryClient.invalidateQueries({
+        queryKey: ['board'],
       });
       message.success('Issue status updated successfully');
     },

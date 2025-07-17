@@ -24,9 +24,11 @@ class IssueModel {
   static async findById(id: number): Promise<Issue | undefined> {
     return await db.get(`
       SELECT i.*, s.name as status_name, s.category as status_category, s.color as status_color,
-             assignee.full_name as assignee_name, reporter.full_name as reporter_name
+             assignee.full_name as assignee_name, reporter.full_name as reporter_name,
+             p.name as project_name
       FROM issues i
       JOIN issue_statuses s ON i.status_id = s.id
+      JOIN projects p ON i.project_id = p.id
       LEFT JOIN users assignee ON i.assignee_id = assignee.id
       JOIN users reporter ON i.reporter_id = reporter.id
       WHERE i.id = ?
@@ -36,9 +38,11 @@ class IssueModel {
   static async getByProject(projectId: number, sprintId?: number): Promise<Issue[]> {
     let query = `
       SELECT i.*, s.name as status_name, s.category as status_category, s.color as status_color,
-             assignee.full_name as assignee_name, reporter.full_name as reporter_name
+             assignee.full_name as assignee_name, reporter.full_name as reporter_name,
+             p.name as project_name
       FROM issues i
       JOIN issue_statuses s ON i.status_id = s.id
+      JOIN projects p ON i.project_id = p.id
       LEFT JOIN users assignee ON i.assignee_id = assignee.id
       JOIN users reporter ON i.reporter_id = reporter.id
       WHERE i.project_id = ?
@@ -74,14 +78,66 @@ class IssueModel {
   }
 
   static async update(id: number, issueData: UpdateIssueData): Promise<Issue> {
-    const { title, description, type, priority, status_id, assignee_id, sprint_id, story_points, start_date } = issueData;
+    const fieldsToUpdate: string[] = [];
+    const values: any[] = [];
     
-    await db.run(
-      `UPDATE issues SET title = ?, description = ?, type = ?, priority = ?, status_id = ?, 
-       assignee_id = ?, sprint_id = ?, story_points = ?, start_date = ?, updated_at = CURRENT_TIMESTAMP 
-       WHERE id = ?`,
-      [title, description, type, priority, status_id, assignee_id, sprint_id, story_points, start_date, id]
-    );
+    // Only update provided fields (including null values)
+    if (issueData.title !== undefined) {
+      fieldsToUpdate.push('title = ?');
+      values.push(issueData.title);
+    }
+    if (issueData.description !== undefined) {
+      fieldsToUpdate.push('description = ?');
+      values.push(issueData.description);
+    }
+    if (issueData.type !== undefined) {
+      fieldsToUpdate.push('type = ?');
+      values.push(issueData.type);
+    }
+    if (issueData.priority !== undefined) {
+      fieldsToUpdate.push('priority = ?');
+      values.push(issueData.priority);
+    }
+    if (issueData.status_id !== undefined) {
+      fieldsToUpdate.push('status_id = ?');
+      values.push(issueData.status_id);
+    }
+    if (issueData.assignee_id !== undefined) {
+      fieldsToUpdate.push('assignee_id = ?');
+      values.push(issueData.assignee_id);
+    }
+    if (issueData.hasOwnProperty('sprint_id')) {
+      fieldsToUpdate.push('sprint_id = ?');
+      values.push(issueData.sprint_id);
+    }
+    if (issueData.story_points !== undefined) {
+      fieldsToUpdate.push('story_points = ?');
+      values.push(issueData.story_points);
+    }
+    if (issueData.start_date !== undefined) {
+      fieldsToUpdate.push('start_date = ?');
+      values.push(issueData.start_date);
+    }
+    if (issueData.before_image !== undefined) {
+      fieldsToUpdate.push('before_image = ?');
+      values.push(issueData.before_image);
+    }
+    if (issueData.after_image !== undefined) {
+      fieldsToUpdate.push('after_image = ?');
+      values.push(issueData.after_image);
+    }
+    
+    if (fieldsToUpdate.length === 0) {
+      throw new Error('No fields to update');
+    }
+    
+    // Always update the updated_at timestamp
+    fieldsToUpdate.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(id); // Add id for WHERE clause
+    
+    const query = `UPDATE issues SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+    
+    await db.run(query, values);
     
     const issue = await this.findById(id);
     if (!issue) {
@@ -162,9 +218,11 @@ class IssueModel {
   static async getByDateRange(projectId: number, startDate: string, endDate: string): Promise<Issue[]> {
     return await db.query(`
       SELECT i.*, s.name as status_name, s.category as status_category, s.color as status_color,
-             assignee.full_name as assignee_name, reporter.full_name as reporter_name
+             assignee.full_name as assignee_name, reporter.full_name as reporter_name,
+             p.name as project_name
       FROM issues i
       JOIN issue_statuses s ON i.status_id = s.id
+      JOIN projects p ON i.project_id = p.id
       LEFT JOIN users assignee ON i.assignee_id = assignee.id
       JOIN users reporter ON i.reporter_id = reporter.id
       WHERE i.project_id = ? 
