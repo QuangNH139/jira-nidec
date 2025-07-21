@@ -185,6 +185,51 @@
   box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
 }
 
+/* Jira Project Cards */
+.jira-project-card:hover {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 4px 8px rgba(0, 82, 204, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+.jira-project-card .ant-card-actions {
+  background: var(--background-gray) !important;
+  border-top: 1px solid var(--border-light) !important;
+}
+
+.jira-project-card .ant-card-actions > li {
+  margin: 8px 0 !important;
+}
+
+.jira-project-card .ant-card-actions > li:not(:last-child) {
+  border-right: 1px solid var(--border-light) !important;
+}
+
+.jira-project-card .ant-card-actions .anticon:hover {
+  color: var(--primary-blue) !important;
+}
+
+/* Modal Styling */
+.ant-modal {
+  border-radius: 3px !important;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid var(--border-light) !important;
+  border-radius: 3px 3px 0 0 !important;
+}
+
+.ant-modal-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid var(--border-light) !important;
+  border-radius: 0 0 3px 3px !important;
+}
+
 /* Custom global styles */
 body {
   margin: 0;

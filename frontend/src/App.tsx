@@ -119,7 +119,7 @@ const antdTheme = {
       fontWeight: 500,
     },
     Avatar: {
-      // Remove fontWeight as it's not a valid Avatar token
+      // Avatar component styling moved to CSS
     },
   },
 };
