@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal, Form, Input, DatePicker, Button, message } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sprintsAPI } from '../services/api';
-import dayjs from 'dayjs';
 
 interface CreateSprintModalProps {
   visible: boolean;
@@ -127,7 +126,6 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
             <DatePicker 
               style={{ width: '100%' }}
               placeholder="Select start date"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
             />
           </Form.Item>
 
@@ -150,7 +148,6 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
             <DatePicker 
               style={{ width: '100%' }}
               placeholder="Select end date"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
             />
           </Form.Item>
         </div>
