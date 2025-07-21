@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal, Form, Input, DatePicker, Button, message } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sprintsAPI } from '../services/api';
-import dayjs from 'dayjs';
 
 interface CreateSprintModalProps {
   visible: boolean;
