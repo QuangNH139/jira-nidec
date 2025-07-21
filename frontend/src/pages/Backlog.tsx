@@ -335,10 +335,10 @@ const SprintCard: React.FC<{
       await issuesAPI.update(issueId, { sprint_id: sprintId });
       // Invalidate all related queries for better synchronization
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['backlog'] }),
-        queryClient.invalidateQueries({ queryKey: ['sprints'] }),
+        queryClient.invalidateQueries({ queryKey: ['backlog', sprint.project_id.toString()] }),
+        queryClient.invalidateQueries({ queryKey: ['sprints', sprint.project_id.toString()] }),
         queryClient.invalidateQueries({ queryKey: ['issues'] }),
-        queryClient.invalidateQueries({ queryKey: ['active-sprint'] })
+        queryClient.invalidateQueries({ queryKey: ['active-sprint', sprint.project_id.toString()] })
       ]);
       message.success('Issue moved to sprint successfully');
     } catch (error) {
@@ -542,10 +542,11 @@ const SprintCard: React.FC<{
 
 const BacklogCard: React.FC<{
   issues: Issue[];
+  projectId: string;
   onViewIssue: (issue: Issue) => void;
   onEditIssue: (issue: Issue) => void;
   onDeleteIssue: (issueId: number) => void;
-}> = ({ issues, onViewIssue, onEditIssue, onDeleteIssue }) => {
+}> = ({ issues, projectId, onViewIssue, onEditIssue, onDeleteIssue }) => {
   const queryClient = useQueryClient();
   
   const [{ isOver, canDrop }, drop] = useDrop({
@@ -579,10 +580,10 @@ const BacklogCard: React.FC<{
       await issuesAPI.update(issueId, { sprint_id: null });
       // Invalidate all related queries for better synchronization
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['backlog'] }),
-        queryClient.invalidateQueries({ queryKey: ['sprints'] }),
+        queryClient.invalidateQueries({ queryKey: ['backlog', projectId] }),
+        queryClient.invalidateQueries({ queryKey: ['sprints', projectId] }),
         queryClient.invalidateQueries({ queryKey: ['issues'] }),
-        queryClient.invalidateQueries({ queryKey: ['active-sprint'] })
+        queryClient.invalidateQueries({ queryKey: ['active-sprint', projectId] })
       ]);
       message.success('Issue moved to backlog successfully');
     } catch (error) {
@@ -1218,6 +1219,7 @@ const Backlog: React.FC = () => {
               </div>
               <BacklogCard
                 issues={backlogIssues}
+                projectId={projectId!}
                 onViewIssue={handleViewIssue}
                 onEditIssue={handleEditIssue}
                 onDeleteIssue={handleDeleteIssue}
