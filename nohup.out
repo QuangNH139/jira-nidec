@@ -32,3 +32,130 @@ Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
 
 [4410:4410:0721/013146.086375:ERROR:services/on_device_model/ml/gpu_blocklist.cc:120] Unable to get gpu adapter
 [4274:4274:0721/013146.086621:ERROR:services/on_device_model/public/cpp/service_client.cc:36] Unexpected on_device_model service disconnect: The device's GPU is not supported.
+[4274:4274:0721/014208.553422:ERROR:content/common/zygote/zygote_communication_linux.cc:296] Failed to send GetTerminationStatus message to zygote
+[4274:4274:0721/014208.553714:ERROR:content/common/zygote/zygote_communication_linux.cc:296] Failed to send GetTerminationStatus message to zygote
+[4274:4274:0721/014208.574562:ERROR:content/common/zygote/zygote_communication_linux.cc:296] Failed to send GetTerminationStatus message to zygote
+[4274:4274:0721/014208.579810:ERROR:content/common/zygote/zygote_communication_linux.cc:296] Failed to send GetTerminationStatus message to zygote
+[4274:4274:0721/014208.580891:ERROR:content/common/zygote/zygote_communication_linux.cc:296] Failed to send GetTerminationStatus message to zygote
+[4274:4274:0721/014208.608432:ERROR:content/browser/gpu/gpu_process_host.cc:951] GPU process launch failed: error_code=1002
+[4274:4274:0721/014208.610863:ERROR:content/browser/gpu/gpu_process_host.cc:951] GPU process launch failed: error_code=1002
+[4274:4274:0721/014208.612245:ERROR:content/browser/gpu/gpu_process_host.cc:951] GPU process launch failed: error_code=1002
+[4274:4274:0721/014208.612272:FATAL:content/browser/gpu/gpu_data_manager_impl_private.cc:415] GPU process isn't usable. Goodbye.
+#0 0x55b0ac7c6492 base::debug::CollectStackTrace()
+#1 0x55b0ac7b349e base::debug::StackTrace::StackTrace()
+#2 0x55b0ac70079a logging::LogMessage::Flush()
+#3 0x55b0ac701219 logging::LogMessageFatal::~LogMessageFatal()
+#4 0x55b0aa03e287 content::(anonymous namespace)::IntentionallyCrashBrowserForUnusableGpuProcess()
+#5 0x55b0aa03b5bf content::GpuDataManagerImplPrivate::FallBackToNextGpuMode()
+#6 0x55b0aa03e29e content::GpuDataManagerImplPrivate::FallBackToNextGpuModeDueToCrash()
+#7 0x55b0aa03a1fb content::GpuDataManagerImpl::FallBackToNextGpuModeDueToCrash()
+#8 0x55b0aa045a59 content::GpuProcessHost::RecordProcessCrash()
+#9 0x55b0aa046eb7 content::GpuProcessHost::OnProcessLaunchFailed()
+#10 0x55b0a9dfea91 content::BrowserChildProcessHostImpl::OnProcessLaunchFailed()
+#11 0x55b0a9e93e63 content::ChildProcessLauncher::Notify()
+#12 0x55b0a9e958aa content::internal::ChildProcessLauncherHelper::PostLaunchOnClientThread()
+#13 0x55b0a9e95dd6 base::internal::Invoker<>::RunOnce()
+#14 0x55b0ac755099 base::TaskAnnotator::RunTaskImpl()
+#15 0x55b0ac772b52 base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWorkImpl()
+#16 0x55b0ac7725db base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+#17 0x55b0ac772fc5 base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+#18 0x55b0ac7dd76c base::MessagePumpGlib::Run()
+#19 0x55b0ac77331d base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::Run()
+#20 0x55b0ac733751 base::RunLoop::Run()
+#21 0x55b0a9e1d57d content::BrowserMainLoop::RunMainMessageLoop()
+#22 0x55b0a9e1f242 content::BrowserMainRunnerImpl::Run()
+#23 0x55b0a9e1a740 content::BrowserMain()
+#24 0x55b0ab9b73cd content::RunBrowserProcessMain()
+#25 0x55b0ab9b8a8f content::ContentMainRunnerImpl::RunBrowser()
+#26 0x55b0ab9b8900 content::ContentMainRunnerImpl::Run()
+#27 0x55b0ab9b61f0 content::RunContentProcess()
+#28 0x55b0ab9b6367 content::ContentMain()
+#29 0x55b0a71e5385 ChromeMain
+#30 0x7f8c7902a1ca (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9)
+#31 0x7f8c7902a28b __libc_start_main
+#32 0x55b0a71e502a _start
+Task trace:
+#0 0x55b0a9e95707 content::internal::ChildProcessLauncherHelper::PostLaunchOnLauncherThread()
+#1 0x55b0a9e949ab content::internal::ChildProcessLauncherHelper::StartLaunchOnClientThread()
+#2 0x55b0acaf8356 mojo::SimpleWatcher::Context::Notify()
+#3 0x55b0acaf8356 mojo::SimpleWatcher::Context::Notify()
+#4 0x55b0acaf8356 mojo::SimpleWatcher::Context::Notify()
+Crash keys:
+  "shutdown-type" = "close"
+  "total-discardable-memory-allocated" = "1490"
+  "gpu-generation-intel" = "0"
+  "gpu_count" = "1"
+  "gpu-devid" = "0x5353"
+  "gpu-venid" = "0x1414"
+  "num-extensions" = "0"
+  "chrome-trace-id" = "779403896175777940"
+  "reentry_guard_tls_slot" = "unused"
+  "variations" = "db59f83a-3f4a17df,8bccc03b-3f4a17df,bd6dd170-b5b075b6,169ded4f-1b6d8788,ed38d9ef-3f4a17df,f6f5c542-3f4a17df,af00e384-3f4a17df,ae727645-d13781e7,f3ed486d-3f4a17df,da493d3c-3f4a17df,81c84cff-3f4a17df,eef5d69a-1dca273f,fba0616d-3f4a17df,f659c5ca-3f4a17df,a8045d2e-aaac510a,b45d023c-5fae3666,d625ae6a-5570cbfd,72bafd3e-cdb4c186,98f58bfe-3f4a17df,a66dbd64-f23d1dea,19593c6e-3f4a17df,b13ca3d9-84f6cff8,3dbad317-3f4a17df,ade3efeb-e1cc0f14,fc1790de-3f4a17df,e2d2a641-baec5b64,102166ac-3f4a17df,4076100b-3f4a17df,fc9ceed7-ee2a48b4,7e6af697-3f4a17df,56fa14f6-c5ed21e1,c92d2cc4-3f4a17df,8f80c10-78198108,255aa854-c5eb06b0,45a2f2f-f9e1b5a8,d1ae5bf4-3f4a17df,ea0d881d-fd860968,8f418b04-36b3300c,f32b2e65-3f4a17df,cad2b12b-8ef57898,dd8dccfb-3f4a17df,89eb0046-3f4a17df,d5f746a4-39aaf314,49ad328f-3f4a17df,d3aecf6a-3f4a17df,260cfd7c-3f4a17df,999e8980-6ec7edcb,ef4764d7-88fcaf7d,669a7db8-3f4a17df,2394f90f-ecc8f8cf,e9844d40-3f4a17df,bcb58f65-3f4a17df,f7d06457-e9d42fcd,d7ce3099-d992c41f,d3566fbd-c6f74b94,c203d55b-3f4a17df,6b6f23a-3f4a17df,10713630-3f4a17df,b86bee04-3f4a17df,4d625646-3f4a17df,9850104b-395bafa,c51092de-3f4a17df,57cd4bf8-3f4a17df,f5c6b1c4-3f4a17df,f9be514e-3f4a17df,caf19648-74472b0b,79662520-3f4a17df,151258bf-3f4a17df,8c162025-3d47f4f4,4eb998ce-3f4a17df,a374fdf0-aaf036e1,70e21b60-3f4a17df,741e95d4-3f4a17df,f45c108d-65bced95,17f5c3f5-3f4a17df,7dcaa2cd-3f4a17df,e0e211ad-e0e211ad,820f17d2-e484eeec,44666d99-3d47f4f4,ef3132a9-3f4a17df,12733ec4-3f4a17df,cae19fc9-50fdd005,f112d133-3f4a17df,6cc45990-3f4a17df,2bac9a6a-3f4a17df,893cc7a4-3f4a17df,3c978b59-3f4a17df,3b02c079-3f4a17df,87684b46-4af1dc7d,b1ceb06f-3f4a17df,56aa5797-e5fec5a6,3d15a2-2cbd28e5,7c0e4650-3f4a17df,444b9649-3f4a17df,3f752d-3f4a17df,2d3e25b-3f4a17df,ad4acdda-3f4a17df,90860314-5ab828e2,2468d6e5-3f4a17df,f5a1eb9a-3f4a17df,ac59e11a-3f4a17df,d6284ba0-9610fd4e,57d6085b-3f4a17df,f419bc72-3f4a17df,470d37ba-3f4a17df,c55491ea-156838e5,3d3963fc-723fa652,2468be5e-5f6398dc,a98def31-2a5a8f5d,1aa5b0d5-fa79c490,a5ecfb95-3f4a17df,289c0dda-19e41000,b446c562-3f4a17df,63831cab-3f4a17df,7ece8311-3f4a17df,7a32e64e-3f4a17df,f108c955-3f4a17df,8579ead7-3f4a17df,d2a642a0-3f4a17df,a0625f50-2574d7cf,e41e244a-3f4a17df,8b679bb8-3f4a17df,88e285c2-3f4a17df,977e3a5f-2f765f61,739df952-739df952,169cac91-3f4a17df,832b8234-3f4a17df,bb993abe-d41e1834,9e5c75f1-30e1b12b,7f24847e-53f28a65,1caa3332-20af8ffe,e900a5ae-4c46d137,54be7848-3f4a17df,40debc11-3f4a17df,49c99bfd-3f4a17df,b53f3ef9-3f4a17df,389951ae-3f4a17df,4ae2f602-3f4a17df,15607410-b6e8dbb7,8abceefd-f7ec9f66,cad46b80-3f4a17df,b33256c0-3f4a17df,6e4a21fe-efc28565,7262ef2c-140d00b2,c984ae3d-65bced95,4146cc26-33f19f67,f314f5b9-89ed2dc6,30cf4980-61673e6,b0f15b33-b0f15b33,dbc0becb-3f4a17df,cba789d9-fe7e877,beae798-a5e2ac51,314a19c6-3f4a17df,59735726-3f4a17df,aa540f4f-3f4a17df,ae1581ef-35f6ea04,2c561bd6-3f4a17df,5133eb43-307b98b1,8e8365ea-3f4a17df,70404afa-803f8fc4,f3b6291d-c4414d29,14b2973a-3177bcb8,e0041356-8a5e9319,b76b514f-3ac589b9,15d1b2d8-3f4a17df,fb92da45-3f4a17df,68fef0c-3f4a17df,bf46f37a-3f4a17df,de028327-70abd7a5,29990ed3-3f4a17df,ee06384e-3f4a17df,54412203-573b100b,5bd29318-5ca664ae,a2db6721-3f4a17df,aa21b99b-3f4a17df,c0e0d936-3f4a17df,267755c6-3f4a17df,1fb31bc6-3f4a17df,198413d6-3f4a17df,5abe5347-3f4a17df,35a4ced8-3f4a17df,7840af09-3d47f4f4,8782f1a1-3f4a17df,b4c2bd17-23db2647,57e6ff6b-3f4a17df,350559e5-3f4a17df,91cba98-b3b3bb94,d4754f61-3f4a17df,e6ed801e-cf4f6ead,fd051c38-3f4a17df,3779be93-3f4a17df,4ea303a6-3f4a17df,3042ad4b-ad2fa222,b3c54bb3-88fcaf7d,797fe373-3f4a17df,ccc5f0aa-3f4a17df,2bac45ad-3f4a17df,66abf9c6-3f4a17df,836f1ad3-3f4a17df,facc182b-d8918098,5870a003-3f4a17df,8382fe14-3f4a17df,227f9fd6-3f4a17df,5eb745a8-3f4a17df,7c0d937f-3f4a17df,17a43872-3f4a17df,2eb01e0a-d93a0620,a716fea0-3f4a17df,58065933-e77f02dd,3e672fd9-3dbe2353,47a0a3b2-3f4a17df,683a3aae-80f9a33e,14789165-3f4a17df,8e0a63e8-3f4a17df,c75c6bbe-3f4a17df,601dc969-3f4a17df,5da7c555-3f4a17df,2f0a9b74-3f4a17df,e32097a3-3f4a17df,6d123c61-a13a8969,a62c052e-3f4a17df,da968c94-3f4a17df,dc738ae3-3f4a17df,6deb1450-3f4a17df,3843461e-3f4a17df,a88cddf3-3f4a17df,54d601a5-3f4a17df,4505a270-3f4a17df,d1606151-3f4a17df,b9ffbd4a-35efc336,8c6d6f42-3f4a17df,66b7a83f-3f4a17df,f9664fa0-3f4a17df,137f6fe-3f4a17df,d721a76b-3f4a17df,4620a8f0-3f4a17df,9982045c-3f4a17df,2b68be8f-3f4a17df,b7ff085-3d47f4f4,c823d1e9-3d47f4f4,e2d38844-3f4a17df,afeeb5d0-3f4a17df,19e446cd-3f4a17df,f613598-3f4a17df,613081e8-3f4a17df,5b364a35-3f4a17df,c49d2b35-3f4a17df,9a0df95c-3f4a17df,2faf225b-3f4a17df,84a57efe-3f4a17df,51d22fd4-3f4a17df,bea4a9c2-94315184,2f6246c2-3f4a17df,92c76c82-3f4a17df,d04818be-3f4a17df,595f5eb0-f23d1dea,5910121-3f4a17df,f9a6f6e9-3f4a17df,46d7c84e-3f4a17df,db55e85b-ecb6e1a6,cef95416-b1f74a2,d89640a1-2f213ed2,62668b66-3f4a17df,3e45686e-d1bf3faa,864a51e5-aa32be6,bef5c006-3f4a17df,efb0dc7b-3f4a17df,c1e0d32e-3f4a17df,1ffefb1a-3f4a17df,18324944-3f4a17df,3fc87288-3f4a17df,ad9b71e2-3f4a17df,bb84837d-3f4a17df,377002b7-3f4a17df,762e8080-97dacb2,e9fef5c2-3f4a17df,96d006a-c3a49e71,f6264095-c3f8eab0,95a095bd-3f4a17df,2e7369a1-4aceb943,45b76973-6f345330,186d6e2c-36c0e608,26016f9f-4df4f25e,963667b1-3f4a17df,52a20523-3f4a17df,17196951-3f4a17df,af3bcdf9-a7f4b1b6,ed2195eb-3f4a17df,f42905ff-3f4a17df,a05c89eb-67c903d4,1b0dc97-3f4a17df,3574b3d7-3f4a17df,d990c4ac-3f4a17df,6d2935ee-3f4a17df,c91271f8-3f4a17df,3906c665-3f4a17df,f4f00e05-ca7d8d80,9481ce98-3d47f4f4,2a426c03-3d47f4f4,70678518-dee66fa8,be338734-dee66fa8,5f9907a9-dee66fa8,8eeccb9a-dee66fa8,2b465683-dee66fa8,52fc7926-ee3d6169,bc9b361d-dee66fa8,a41a7188-dee66fa8,ff71bfdc-dee66fa8,e7cc79d5-dee66fa8,4b935545-bb2d3403,9a38bae3-3d47f4f4,2d1e43a3-3d47f4f4,386dc267-3d47f4f4,6c377b0f-a744f381,d69d967d-4866ef6e,a4406b35-1657e2d6,408da146-1657e2d6,a983f698-9fb261c5,"
+  "num-experiments" = "318"
+  "switch-11" = "--use-angle=swiftshader-webgl"
+  "switch-10" = "--ozone-override-screen-size=800,600"
+  "switch-9" = "--ozone-platform=headless"
+  "switch-8" = "--user-data-dir=/tmp/.org.chromium.Chromium.nNyPZB"
+  "switch-7" = "--no-first-run"
+  "switch-6" = "--noerrdialogs"
+  "switch-5" = "--incognito"
+  "switch-4" = "--remote-debugging-port=9222"
+  "switch-3" = "--disable-gpu"
+  "switch-2" = "--no-sandbox"
+  "switch-1" = "--headless"
+  "num-switches" = "13"
+  "osarch" = "x86_64"
+  "pid" = "4274"
+  "ptype" = "browser"
+
+[0721/014211.484862:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: No such file or directory (2)
+[0721/014211.503240:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: No such file or directory (2)
+Received signal 6
+#0 0x55b0ac7c6492 base::debug::CollectStackTrace()
+#1 0x55b0ac7b349e base::debug::StackTrace::StackTrace()
+#2 0x55b0ac7c5f08 base::debug::(anonymous namespace)::StackDumpSignalHandler()
+#3 0x7f8c79045330 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x4532f)
+#4 0x7f8c7909eb2c pthread_kill
+#5 0x7f8c7904527e gsignal
+#6 0x7f8c790288ff abort
+#7 0x55b0ac7a6e65 base::debug::BreakDebuggerAsyncSafe()
+#8 0x55b0ac7011d3 base::RepeatingCallback<>::Run()
+#9 0x55b0ac701095 logging::LogMessage::HandleFatal()
+#10 0x55b0ac700d04 logging::LogMessage::Flush()
+#11 0x55b0ac701219 logging::LogMessageFatal::~LogMessageFatal()
+#12 0x55b0aa03e287 content::(anonymous namespace)::IntentionallyCrashBrowserForUnusableGpuProcess()
+#13 0x55b0aa03b5bf content::GpuDataManagerImplPrivate::FallBackToNextGpuMode()
+#14 0x55b0aa03e29e content::GpuDataManagerImplPrivate::FallBackToNextGpuModeDueToCrash()
+#15 0x55b0aa03a1fb content::GpuDataManagerImpl::FallBackToNextGpuModeDueToCrash()
+#16 0x55b0aa045a59 content::GpuProcessHost::RecordProcessCrash()
+#17 0x55b0aa046eb7 content::GpuProcessHost::OnProcessLaunchFailed()
+#18 0x55b0a9dfea91 content::BrowserChildProcessHostImpl::OnProcessLaunchFailed()
+#19 0x55b0a9e93e63 content::ChildProcessLauncher::Notify()
+#20 0x55b0a9e958aa content::internal::ChildProcessLauncherHelper::PostLaunchOnClientThread()
+#21 0x55b0a9e95dd6 base::internal::Invoker<>::RunOnce()
+#22 0x55b0ac755099 base::TaskAnnotator::RunTaskImpl()
+#23 0x55b0ac772b52 base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWorkImpl()
+#24 0x55b0ac7725db base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+#25 0x55b0ac772fc5 base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+#26 0x55b0ac7dd76c base::MessagePumpGlib::Run()
+#27 0x55b0ac77331d base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::Run()
+#28 0x55b0ac733751 base::RunLoop::Run()
+#29 0x55b0a9e1d57d content::BrowserMainLoop::RunMainMessageLoop()
+#30 0x55b0a9e1f242 content::BrowserMainRunnerImpl::Run()
+#31 0x55b0a9e1a740 content::BrowserMain()
+#32 0x55b0ab9b73cd content::RunBrowserProcessMain()
+#33 0x55b0ab9b8a8f content::ContentMainRunnerImpl::RunBrowser()
+#34 0x55b0ab9b8900 content::ContentMainRunnerImpl::Run()
+#35 0x55b0ab9b61f0 content::RunContentProcess()
+#36 0x55b0ab9b6367 content::ContentMain()
+#37 0x55b0a71e5385 ChromeMain
+#38 0x7f8c7902a1ca (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9)
+#39 0x7f8c7902a28b __libc_start_main
+#40 0x55b0a71e502a _start
+  r8: 000021540060ac80  r9: 000000000000235b r10: 0000000000000008 r11: 0000000000000246
+ r12: 0000000000000006 r13: 00000000000023db r14: 0000000000000016 r15: 00007ffe9a91bf70
+  di: 00000000000010b2  si: 00000000000010b2  bp: 00007ffe9a91be20  bx: 00000000000010b2
+  dx: 0000000000000006  ax: 0000000000000000  cx: 00007f8c7909eb2c  sp: 00007ffe9a91bde0
+  ip: 00007f8c7909eb2c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000
+ trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000
+[end of stack trace]
