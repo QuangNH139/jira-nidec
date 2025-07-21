@@ -36,21 +36,90 @@ const queryClient = new QueryClient({
   },
 });
 
-// Ant Design theme configuration
+// Ant Design theme configuration - Jira style
 const antdTheme = {
   token: {
-    colorPrimary: '#1890ff',
-    borderRadius: 6,
+    colorPrimary: '#0052cc',
+    colorPrimaryHover: '#0065ff',
+    colorPrimaryActive: '#003884',
+    borderRadius: 3,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+    fontSize: 14,
+    fontSizeHeading1: 24,
+    fontSizeHeading2: 20,
+    fontSizeHeading3: 16,
+    fontSizeHeading4: 14,
+    colorText: '#172b4d',
+    colorTextSecondary: '#5e6c84',
+    colorTextTertiary: '#6b778c',
+    colorBgContainer: '#ffffff',
+    colorBgLayout: '#f4f5f7',
+    colorBorder: '#dfe1e6',
+    colorBorderSecondary: '#f4f5f7',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+    boxShadowSecondary: '0 1px 3px rgba(0, 0, 0, 0.08)',
   },
   components: {
     Layout: {
-      siderBg: '#001529',
-      headerBg: '#fff',
+      siderBg: '#ffffff',
+      headerBg: '#ffffff',
+      bodyBg: '#f4f5f7',
+      headerHeight: 64,
+      headerPadding: '0 24px',
+      triggerBg: '#ffffff',
+      triggerColor: '#42526e',
     },
     Menu: {
-      darkItemBg: '#001529',
-      darkSubMenuItemBg: '#000c17',
+      itemBg: 'transparent',
+      itemSelectedBg: '#deebff',
+      itemSelectedColor: '#0052cc',
+      itemHoverBg: '#fafbfc',
+      itemHoverColor: '#0052cc',
+      itemActiveBg: '#deebff',
+      itemHeight: 40,
+      itemMarginInline: 8,
+      itemBorderRadius: 3,
+      iconSize: 16,
+    },
+    Button: {
+      borderRadius: 3,
+      fontWeight: 500,
+      primaryShadow: 'none',
+      defaultShadow: 'none',
+    },
+    Card: {
+      borderRadius: 3,
+      headerBg: '#ffffff',
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+      boxShadowHover: '0 2px 8px rgba(0, 82, 204, 0.15)',
+    },
+    Table: {
+      borderRadius: 3,
+      headerBg: '#fafbfc',
+      headerColor: '#172b4d',
+      rowHoverBg: '#f4f5f7',
+    },
+    Input: {
+      borderRadius: 3,
+      activeBorderColor: '#0052cc',
+      hoverBorderColor: '#0052cc',
+      activeShadow: '0 0 0 2px rgba(0, 82, 204, 0.2)',
+    },
+    Select: {
+      borderRadius: 3,
+      optionSelectedBg: '#deebff',
+      optionSelectedColor: '#0052cc',
+    },
+    Modal: {
+      borderRadius: 3,
+      headerBg: '#ffffff',
+    },
+    Tag: {
+      borderRadius: 3,
+      fontWeight: 500,
+    },
+    Avatar: {
+      // Avatar component styling moved to CSS
     },
   },
 };

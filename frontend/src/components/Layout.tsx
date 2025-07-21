@@ -12,6 +12,7 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
+import JiraBreadcrumb from './JiraBreadcrumb';
 
 const { Header, Sider, Content } = AntLayout;
 const { Title } = Typography;
@@ -41,17 +42,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     ...(user?.role === 'admin' ? [{
       key: '/users',
       icon: <UserOutlined />,
-      label: 'Users',
+      label: 'People',
     }] : []),
     {
       key: '/my-activities',
       icon: <ClockCircleOutlined />,
-      label: 'My Activities',
+      label: 'Your work',
     },
     {
       key: '/profile',
       icon: <SettingOutlined />,
-      label: 'Profile',
+      label: 'Settings',
     },
   ];
 
@@ -83,16 +84,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <AntLayout style={{ minHeight: '100vh' }}>
+    <AntLayout style={{ minHeight: '100vh', background: '#f4f5f7' }}>
       <Sider 
         trigger={null} 
         collapsible 
         collapsed={collapsed} 
         theme="light"
+        width={280}
+        collapsedWidth={64}
         style={{
           background: '#ffffff',
-          borderRight: '1px solid #f0f0f0',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          borderRight: '1px solid #dfe1e6',
+          boxShadow: '1px 0 2px rgba(0,0,0,0.08)',
+          position: 'relative',
+          zIndex: 10,
         }}
       >
         <div style={{ 
@@ -100,18 +105,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           margin: 0, 
           display: 'flex', 
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          padding: collapsed ? '0' : '0 16px',
           background: '#0052cc',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: '1px solid #dfe1e6',
+          transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)',
         }}>
           <Title 
             level={4} 
             style={{ 
               color: 'white', 
               margin: 0,
-              fontSize: collapsed ? '16px' : '18px',
-              transition: 'all 0.3s',
-              textAlign:'center'
+              fontSize: collapsed ? '14px' : '16px',
+              fontWeight: 600,
+              transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)',
+              letterSpacing: collapsed ? '0' : '0.5px',
             }}
           >
             {collapsed ? 'NTM' : 'NIDEC TASK MANAGEMENT'}
@@ -125,8 +133,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           onClick={handleMenuClick}
           style={{
             borderRight: 'none',
-            marginTop: '16px',
+            paddingTop: '8px',
+            background: 'transparent',
           }}
+          className="jira-sidebar-menu"
         />
       </Sider>
       <AntLayout>
@@ -136,8 +146,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #f0f0f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          borderBottom: '1px solid #dfe1e6',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+          height: 64,
+          position: 'relative',
+          zIndex: 9,
         }}>
           <Button
             type="text"
@@ -145,10 +158,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             onClick={() => setCollapsed(!collapsed)}
             style={{
               fontSize: '16px',
-              width: 64,
-              height: 64,
-              color: '#0052cc',
+              width: 40,
+              height: 40,
+              color: '#42526e',
+              borderRadius: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
+            className="jira-toggle-button"
           />
           
           <Dropdown
@@ -160,17 +178,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               display: 'flex', 
               alignItems: 'center', 
               cursor: 'pointer',
-              padding: '4px 8px',
-              borderRadius: '6px',
-              transition: 'background-color 0.3s',
-            }}>
+              padding: '6px 12px',
+              borderRadius: '3px',
+              transition: 'background-color 0.2s ease',
+            }}
+            className="jira-user-menu"
+            >
               <Avatar 
-                size="small" 
-                style={{ backgroundColor: '#0052cc', marginRight: 8 }}
+                size={24} 
+                style={{ 
+                  backgroundColor: '#0052cc', 
+                  marginRight: 8,
+                  fontSize: '12px',
+                  fontWeight: 600,
+                }}
               >
                 {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
               </Avatar>
-              <span style={{ marginLeft: 8, color: '#262626' }}>
+              <span style={{ 
+                marginLeft: 4, 
+                color: '#172b4d',
+                fontSize: '14px',
+                fontWeight: 500,
+              }}>
                 {user?.full_name || user?.username}
               </span>
             </div>
@@ -178,14 +208,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Header>
         <Content
           style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
+            margin: '16px',
+            padding: '24px',
+            minHeight: 'calc(100vh - 96px)',
             background: '#ffffff',
-            borderRadius: '6px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            borderRadius: '3px',
+            border: '1px solid #dfe1e6',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            overflow: 'auto',
           }}
         >
+          <JiraBreadcrumb />
           {children}
         </Content>
       </AntLayout>

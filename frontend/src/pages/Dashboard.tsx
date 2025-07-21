@@ -116,26 +116,47 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div>
+    <div style={{ background: '#ffffff' }}>
       <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: 0 }}>
-          Welcome back, {user?.full_name || user?.username}!
+        <Title level={1} style={{ 
+          margin: 0, 
+          fontSize: '24px',
+          fontWeight: 500,
+          color: '#172b4d',
+          marginBottom: '8px',
+        }}>
+          Dashboard
         </Title>
-        <Text type="secondary">
-          Here's what's happening with your projects today.
+        <Text style={{ 
+          color: '#5e6c84',
+          fontSize: '14px',
+        }}>
+          Welcome back, {user?.full_name || user?.username}. Here's what's happening with your projects today.
         </Text>
       </div>
 
       {/* Stats Grid */}
-      <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
         {statsData.map((stat, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
-            <Card>
+            <Card 
+              style={{
+                borderRadius: '3px',
+                border: '1px solid #dfe1e6',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease',
+              }}
+              className="jira-stat-card"
+            >
               <Statistic
-                title={stat.title}
+                title={<span style={{ fontSize: '12px', color: '#5e6c84', fontWeight: 500 }}>{stat.title}</span>}
                 value={stat.value}
                 prefix={stat.icon}
-                valueStyle={{ color: stat.color }}
+                valueStyle={{ 
+                  color: stat.color,
+                  fontSize: '24px',
+                  fontWeight: 600,
+                }}
               />
             </Card>
           </Col>
@@ -143,9 +164,32 @@ const Dashboard: React.FC = () => {
       </Row>
 
       {/* Content Grid */}
-      <Row gutter={[24, 24]}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
-          <Card title="My Recent Issues" extra={<Link to="/projects">View All Projects</Link>}>
+          <Card 
+            title={
+              <span style={{ fontSize: '16px', fontWeight: 600, color: '#172b4d' }}>
+                My Recent Issues
+              </span>
+            }
+            extra={
+              <Link 
+                to="/projects" 
+                style={{ 
+                  fontSize: '14px', 
+                  color: '#0052cc',
+                  fontWeight: 500,
+                }}
+              >
+                View All Projects
+              </Link>
+            }
+            style={{
+              borderRadius: '3px',
+              border: '1px solid #dfe1e6',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            }}
+          >
             {userIssues.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <ExclamationCircleOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
@@ -200,7 +244,18 @@ const Dashboard: React.FC = () => {
         </Col>
         
         <Col xs={24} lg={8}>
-          <Card title="Quick Actions">
+          <Card 
+            title={
+              <span style={{ fontSize: '16px', fontWeight: 600, color: '#172b4d' }}>
+                Quick Actions
+              </span>
+            }
+            style={{
+              borderRadius: '3px',
+              border: '1px solid #dfe1e6',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            }}
+          >
             <Space direction="vertical" style={{ width: '100%' }}>
               <Link to="/projects">
                 <Button 
@@ -208,6 +263,11 @@ const Dashboard: React.FC = () => {
                   icon={<ProjectOutlined />} 
                   block
                   size="large"
+                  style={{
+                    borderRadius: '3px',
+                    fontWeight: 500,
+                    height: '40px',
+                  }}
                 >
                   View Projects
                 </Button>
@@ -217,6 +277,12 @@ const Dashboard: React.FC = () => {
                   icon={<TeamOutlined />} 
                   block
                   size="large"
+                  style={{
+                    borderRadius: '3px',
+                    fontWeight: 500,
+                    height: '40px',
+                    border: '1px solid #dfe1e6',
+                  }}
                 >
                   Manage Team
                 </Button>
@@ -226,6 +292,11 @@ const Dashboard: React.FC = () => {
                 block
                 size="large"
                 disabled
+                style={{
+                  borderRadius: '3px',
+                  fontWeight: 500,
+                  height: '40px',
+                }}
               >
                 View Reports
               </Button>
@@ -233,7 +304,19 @@ const Dashboard: React.FC = () => {
           </Card>
 
           {/* Project Summary */}
-          <Card title="My Projects" style={{ marginTop: 16 }}>
+          <Card 
+            title={
+              <span style={{ fontSize: '16px', fontWeight: 600, color: '#172b4d' }}>
+                My Projects
+              </span>
+            }
+            style={{ 
+              marginTop: 16,
+              borderRadius: '3px',
+              border: '1px solid #dfe1e6',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            }}
+          >
             {projects.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '20px 0' }}>
                 <ProjectOutlined style={{ fontSize: 32, color: '#d9d9d9' }} />
