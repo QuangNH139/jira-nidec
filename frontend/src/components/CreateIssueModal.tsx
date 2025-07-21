@@ -1,10 +1,10 @@
 import React from 'react';
 import { Modal, Form, Input, DatePicker, Row, Col } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { issuesAPI, projectsAPI } from '../services/api';
+import { issuesAPI, projectsAPI, sprintsAPI } from '../services/api';
 import { useQueryInvalidation } from '../hooks/useQueryInvalidation';
 import { getFieldConfig } from '../utils/formHelpers';
-import { IssueTypeSelect, PrioritySelect, MembersSelect, StoryPointsSelect, StatusesSelect } from './shared/FormSelects';
+import { IssueTypeSelect, PrioritySelect, MembersSelect, StoryPointsSelect, StatusesSelect, SprintsSelect } from './shared/FormSelects';
 import { FormModalFooter } from './shared/ModalFooter';
 
 const { TextArea } = Input;
@@ -52,6 +52,14 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
     enabled: !!projectId
   });
 
+  // Fetch project sprints
+  const sprintsQuery = useQuery({
+    queryKey: ['project-sprints', projectId],
+    queryFn: () => sprintsAPI.getByProject(projectId),
+    select: (response) => response.data,
+    enabled: !!projectId
+  });
+
   const createIssueMutation = useMutation({
     mutationFn: (data: CreateIssueData) => issuesAPI.create(data),
     onSuccess: () => {
@@ -74,6 +82,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
         status_id: values.status_id,
         assignee_id: values.assignee_id,
         project_id: projectId,
+        sprint_id: values.sprint_id,
         story_points: values.story_points,
         start_date: values.start_date ? values.start_date.format('YYYY-MM-DD') : undefined,
       };
@@ -91,6 +100,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
 
   const members = membersQuery.data || [];
   const statuses = statusesQuery.data || [];
+  const sprints = sprintsQuery.data || [];
 
   const titleConfig = getFieldConfig('taskTitle');
   const descriptionConfig = getFieldConfig('description');
@@ -98,6 +108,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
   const priorityConfig = getFieldConfig('priority');
   const statusConfig = getFieldConfig('status');
   const assigneeConfig = getFieldConfig('assignee');
+  const sprintConfig = getFieldConfig('sprint');
   const storyPointsConfig = getFieldConfig('storyPoints');
   const startDateConfig = getFieldConfig('startDate');
 
@@ -175,7 +186,18 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
         </Row>
 
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
+            <Form.Item
+              {...sprintConfig}
+            >
+              <SprintsSelect
+                sprints={sprints}
+                placeholder={sprintConfig.placeholder}
+                allowClear
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item 
               {...storyPointsConfig}
             >
@@ -185,7 +207,7 @@ const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item 
               {...startDateConfig}
             >

@@ -127,3 +127,27 @@ export const StatusesSelect: React.FC<StatusesSelectProps> = ({
     </Select>
   );
 };
+
+// Sprints Select Component
+interface SprintsSelectProps extends BaseSelectProps {
+  sprints: Array<{
+    id: number;
+    name: string;
+    status?: string;
+  }>;
+}
+
+export const SprintsSelect: React.FC<SprintsSelectProps> = ({ 
+  sprints, 
+  ...props 
+}) => {
+  return (
+    <Select {...props}>
+      {sprints.map(sprint => (
+        <Option key={sprint.id} value={sprint.id}>
+          {sprint.name} {sprint.status && `(${sprint.status})`}
+        </Option>
+      ))}
+    </Select>
+  );
+};
