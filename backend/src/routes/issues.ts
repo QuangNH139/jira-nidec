@@ -671,4 +671,166 @@ router.delete('/:id', authenticateToken, async (req: AuthenticatedRequest, res: 
   }
 });
 
+// Add issue to sprint
+router.patch('/:id/sprint', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const issueId = parseInt(req.params.id);
+    const { sprint_id } = req.body;
+    
+    if (!sprint_id) {
+      return res.status(400).json({ error: 'Sprint ID is required' });
+    }
+
+    const existingIssue = await IssueModel.findById(issueId);
+    
+    if (!existingIssue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    // Check if user is admin or a member of the project
+    if (req.user.role !== 'admin') {
+      const members = await ProjectModel.getMembers(existingIssue.project_id);
+      const isMember = members.some(member => member.id === req.user!.id);
+      
+      if (!isMember) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    }
+
+    const issue = await IssueModel.addToSprint(issueId, sprint_id);
+    
+    await Logger.info('ISSUE_ADD_TO_SPRINT', {
+      issueId,
+      issueTitle: existingIssue.title,
+      sprintId: sprint_id,
+      previousSprintId: existingIssue.sprint_id,
+      projectId: existingIssue.project_id
+    }, {
+      id: req.user.id,
+      username: req.user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
+    res.json({
+      message: 'Issue added to sprint successfully',
+      issue
+    });
+  } catch (error) {
+    console.error('Add issue to sprint error:', error);
+    
+    if (req.user) {
+      await Logger.error('ISSUE_ADD_TO_SPRINT_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        issueId: req.params.id,
+        sprintId: req.body.sprint_id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get project statistics
+router.get('/project/:projectId/stats', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const projectId = parseInt(req.params.projectId);
+    
+    // Check if user is admin or a member of the project
+    if (req.user.role !== 'admin') {
+      const members = await ProjectModel.getMembers(projectId);
+      const isMember = members.some(member => member.id === req.user!.id);
+      
+      if (!isMember) {
+        return res.status(403).json({ error: 'Access denied to this project' });
+      }
+    }
+
+    const stats = await IssueModel.getProjectStats(projectId);
+    res.json(stats);
+  } catch (error) {
+    console.error('Get project stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Remove issue from sprint
+router.delete('/:id/sprint', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const issueId = parseInt(req.params.id);
+    
+    const existingIssue = await IssueModel.findById(issueId);
+    
+    if (!existingIssue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    // Check if user is admin or a member of the project
+    if (req.user.role !== 'admin') {
+      const members = await ProjectModel.getMembers(existingIssue.project_id);
+      const isMember = members.some(member => member.id === req.user!.id);
+      
+      if (!isMember) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    }
+
+    const issue = await IssueModel.removeFromSprint(issueId);
+    
+    await Logger.info('ISSUE_REMOVE_FROM_SPRINT', {
+      issueId,
+      issueTitle: existingIssue.title,
+      previousSprintId: existingIssue.sprint_id,
+      projectId: existingIssue.project_id
+    }, {
+      id: req.user.id,
+      username: req.user.username
+    }, {
+      ip: req.ip,
+      userAgent: req.get('user-agent') || ''
+    });
+    
+    res.json({
+      message: 'Issue removed from sprint successfully',
+      issue
+    });
+  } catch (error) {
+    console.error('Remove issue from sprint error:', error);
+    
+    if (req.user) {
+      await Logger.error('ISSUE_REMOVE_FROM_SPRINT_ERROR', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        issueId: req.params.id
+      }, {
+        id: req.user.id,
+        username: req.user.username
+      }, {
+        ip: req.ip,
+        userAgent: req.get('user-agent') || ''
+      });
+    }
+    
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
