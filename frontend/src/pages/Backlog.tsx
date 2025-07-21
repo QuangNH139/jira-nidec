@@ -40,6 +40,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sprintsAPI, issuesAPI, projectsAPI } from '../services/api';
+import { useDeleteIssue } from '../hooks/useIssues';
 import { Sprint, Issue } from '../types';
 import CreateSprintModal from '../components/CreateSprintModal';
 import EditSprintModal from '../components/EditSprintModal';
@@ -769,6 +770,9 @@ const Backlog: React.FC = () => {
     }
   });
 
+  // Delete issue mutation
+  const deleteIssueMutation = useDeleteIssue(parseInt(projectId!));
+
   if (sprintsQuery.isLoading || issuesQuery.isLoading || membersQuery.isLoading) {
     return <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />;
   }
@@ -851,8 +855,16 @@ const Backlog: React.FC = () => {
   };
 
   const handleDeleteIssue = (issueId: number) => {
-    // TODO: Implement delete issue
-    console.log('Delete issue:', issueId);
+    Modal.confirm({
+      title: 'Delete Issue',
+      content: 'Are you sure you want to delete this issue? This action cannot be undone.',
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: () => {
+        deleteIssueMutation.mutate(issueId);
+      },
+    });
   };
 
   const handleEditSprint = (sprint: Sprint) => {
