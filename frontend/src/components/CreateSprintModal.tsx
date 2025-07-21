@@ -127,7 +127,6 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
             <DatePicker 
               style={{ width: '100%' }}
               placeholder="Select start date"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
             />
           </Form.Item>
 
@@ -150,7 +149,6 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
             <DatePicker 
               style={{ width: '100%' }}
               placeholder="Select end date"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
             />
           </Form.Item>
         </div>
