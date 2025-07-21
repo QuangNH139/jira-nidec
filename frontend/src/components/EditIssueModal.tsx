@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, DatePicker, message, Row, Col } from 'antd';
-import { useMutation } from '@tanstack/react-query';
-import { issuesAPI } from '../services/api';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { issuesAPI, sprintsAPI } from '../services/api';
 import { Issue, ProjectMember } from '../types';
 import { useQueryInvalidation } from '../hooks/useQueryInvalidation';
 import { getFieldConfig } from '../utils/formHelpers';
-import { IssueTypeSelect, PrioritySelect, MembersSelect, StoryPointsSelect } from './shared/FormSelects';
+import { IssueTypeSelect, PrioritySelect, MembersSelect, StoryPointsSelect, SprintsSelect } from './shared/FormSelects';
 import { ImageUpload } from './shared/ImageUpload';
 import { FormModalFooter } from './shared/ModalFooter';
 import dayjs from 'dayjs';
@@ -45,6 +45,14 @@ const EditIssueModal: React.FC<EditIssueModalProps> = ({
   const [beforeImage, setBeforeImage] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
 
+  // Fetch project sprints
+  const sprintsQuery = useQuery({
+    queryKey: ['project-sprints', projectId],
+    queryFn: () => sprintsAPI.getByProject(projectId),
+    select: (response) => response.data,
+    enabled: !!projectId
+  });
+
   const updateIssueMutation = useMutation({
     mutationFn: ({ issueId, data }: { issueId: number; data: UpdateIssueData }) => 
       issuesAPI.update(issueId, data),
@@ -69,6 +77,7 @@ const EditIssueModal: React.FC<EditIssueModalProps> = ({
         type: issue.type,
         priority: issue.priority,
         assignee_id: issue.assignee_id,
+        sprint_id: issue.sprint_id,
         story_points: issue.story_points,
         start_date: issue.start_date ? dayjs(issue.start_date) : null,
       });
@@ -91,8 +100,7 @@ const EditIssueModal: React.FC<EditIssueModalProps> = ({
         start_date: values.start_date ? values.start_date.format('YYYY-MM-DD') : undefined,
         before_image: beforeImage || undefined,
         after_image: afterImage || undefined,
-        // Preserve the current sprint_id to prevent issue from being removed from sprint
-        sprint_id: issue.sprint_id,
+        sprint_id: values.sprint_id,
       };
 
       updateIssueMutation.mutate({
@@ -116,8 +124,11 @@ const EditIssueModal: React.FC<EditIssueModalProps> = ({
   const typeConfig = getFieldConfig('issueType');
   const priorityConfig = getFieldConfig('priority');
   const assigneeConfig = getFieldConfig('assignee');
+  const sprintConfig = getFieldConfig('sprint');
   const storyPointsConfig = getFieldConfig('storyPoints');
   const startDateConfig = getFieldConfig('startDate');
+
+  const sprints = sprintsQuery.data || [];
 
   return (
     <Modal
@@ -174,6 +185,17 @@ const EditIssueModal: React.FC<EditIssueModalProps> = ({
               placeholder={assigneeConfig.placeholder}
               allowClear
               showEmail
+            />
+          </Form.Item>
+
+          <Form.Item
+            {...sprintConfig}
+            style={{ flex: 1 }}
+          >
+            <SprintsSelect 
+              sprints={sprints}
+              placeholder={sprintConfig.placeholder}
+              allowClear
             />
           </Form.Item>
 

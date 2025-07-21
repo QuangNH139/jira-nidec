@@ -173,6 +173,13 @@ export const getFieldConfig = (type: string) => {
         placeholder: 'Enter sprint goal (optional)',
       };
 
+    case 'sprint':
+      return {
+        name: 'sprint_id',
+        label: 'Sprint',
+        placeholder: 'Select sprint (optional)',
+      };
+
     case 'endDate':
       return {
         name: 'end_date',
