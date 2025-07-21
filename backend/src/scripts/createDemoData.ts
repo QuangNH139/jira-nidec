@@ -44,6 +44,25 @@ async function createDemoData(): Promise<void> {
       [1, 2, 'member']
     );
     
+    // Create default issue statuses for the project
+    await db.run(
+      `INSERT OR IGNORE INTO issue_statuses (name, category, color, position, project_id) 
+       VALUES (?, ?, ?, ?, ?)`,
+      ['To Do', 'todo', '#gray', 1, 1]
+    );
+    
+    await db.run(
+      `INSERT OR IGNORE INTO issue_statuses (name, category, color, position, project_id) 
+       VALUES (?, ?, ?, ?, ?)`,
+      ['In Progress', 'inprogress', '#blue', 2, 1]
+    );
+    
+    await db.run(
+      `INSERT OR IGNORE INTO issue_statuses (name, category, color, position, project_id) 
+       VALUES (?, ?, ?, ?, ?)`,
+      ['Done', 'done', '#green', 3, 1]
+    );
+    
     // Create demo sprint
     await db.run(
       `INSERT OR IGNORE INTO sprints (name, goal, project_id, status) 
