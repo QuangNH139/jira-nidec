@@ -211,6 +211,7 @@ export const useDeleteIssue = (projectId: number) => {
       queryClient.invalidateQueries({ queryKey: issueKeys.byProject(projectId) });
       queryClient.invalidateQueries({ queryKey: issueKeys.kanban(projectId) });
       queryClient.invalidateQueries({ queryKey: issueKeys.stats(projectId) });
+      queryClient.invalidateQueries({ queryKey: ['backlog', projectId] });
       message.success('Issue deleted successfully');
     },
     onError: (error: any) => {
